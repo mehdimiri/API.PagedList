@@ -1,3 +1,5 @@
+using API.PagedList;
+using API.PagedList.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Example.WebApplication.Controllers
@@ -14,7 +16,7 @@ namespace Example.WebApplication.Controllers
         private readonly ILogger<WeatherForecastController> _logger = logger;
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public dynamic Get([FromBody]FilterVM filter)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -22,7 +24,8 @@ namespace Example.WebApplication.Controllers
                 TemperatureC = Random.Shared.Next(-20, 55),
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
-            .ToArray();
+            .AsQueryable()
+            .ToPagedList(filter);
         }
     }
 }
