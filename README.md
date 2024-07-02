@@ -98,15 +98,13 @@ public class MyService
     // Get a paged list of entities
     public async Task<PagedListResult<MyEntity>> GetPagedEntities(int pageIndex, int pageSize)
     {
-        var query = _context.MyEntities.AsQueryable();
-        return await query.ToPagedListAsync(pageSize, pageIndex);
+        return await _context.MyEntities.ToPagedListAsync(pageSize, pageIndex);
     }
 
     // Get a filtered and paged list of entities
     public async Task<PagedListResult<MyEntity>> GetFilteredPagedEntities(FilterVM filter)
     {
-        var query = _context.MyEntities.AsQueryable();
-        return await query.ToPagedListAsync(filter);
+        return await _context.MyEntities.ToPagedListAsync(filter);
     }
 }
 ```
