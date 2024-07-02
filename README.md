@@ -52,7 +52,7 @@ var filter = new FilterVM
     PageIndex = 1,
     Conditions = new List<WhereVM>
     {
-        new WhereVM { Name = "PropertyName", Comparison = "=", Value = "Value" }
+        new WhereVM { Name = "PropertyName", Comparison = "==", Value = "Value" }
     },
     OrderBy = new OrderVM { Name = "PropertyName", Ascending = true }
 };
