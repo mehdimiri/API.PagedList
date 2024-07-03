@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace JcoCommon.Extensions;
+namespace API.PagedList;
 
 public static class QueryableExtensions
 {
@@ -28,21 +28,21 @@ public static class QueryableExtensions
 
             Type type = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
             value = Change(value, type);
+
+            ConstantExpression right = Expression.Constant(value, left.Type);
+            Expression body = Create(left, comparison, right);
+            var expression = Expression.Lambda<Func<T, bool>>(body, parameter);
+            return queryable.Where(expression);
         }
         catch
         {
             return Enumerable.Empty<T>().AsQueryable();
         }
-
-        ConstantExpression right = Expression.Constant(value, left.Type);
-        Expression body = Create(left, comparison, right);
-        var expression = Expression.Lambda<Func<T, bool>>(body, parameter);
-        return queryable.Where(expression);
     }
 
     public static IQueryable<T> Order<T>(this IQueryable<T> queryable, string property, bool ascending)
     {
-        if (queryable is null || string.IsNullOrWhiteSpace(property)) 
+        if (queryable is null || string.IsNullOrWhiteSpace(property))
             return queryable;
 
         ParameterExpression parameter = Expression.Parameter(typeof(T));
@@ -53,7 +53,7 @@ public static class QueryableExtensions
 
     public static IQueryable<T> Page<T>(this IQueryable<T> queryable, int index, int size)
     {
-        if (queryable is null || index <= 0 || size <= 0) 
+        if (queryable is null || index <= 0 || size <= 0)
             return queryable;
         return queryable.Skip((index - 1) * size).Take(size);
     }
@@ -89,6 +89,26 @@ public static class QueryableExtensions
         switch (jsonElement.ValueKind)
         {
             case JsonValueKind.String:
+                if (type == typeof(DateOnly) && DateOnly.TryParse(jsonElement.ToString(), out DateOnly dateOnly))
+                {
+                    return dateOnly;
+                }
+                else if (type == typeof(TimeOnly) && TimeOnly.TryParse(jsonElement.ToString(), out TimeOnly timeOnly))
+                {
+                    return timeOnly;
+                }
+                else if (type == typeof(DateTimeOffset) && DateTimeOffset.TryParse(jsonElement.ToString(), out DateTimeOffset dateTimeOffset))
+                {
+                    return dateTimeOffset;
+                }
+                else if (type == typeof(DateTime) && DateTime.TryParse(jsonElement.ToString(), out DateTime dateTime))
+                {
+                    return dateTime;
+                }
+                else if (type == typeof(Guid) && Guid.TryParse(jsonElement.ToString(), out Guid guid))
+                {
+                    return guid;
+                }
                 return jsonElement.GetString();
             case JsonValueKind.Number:
                 if (type == typeof(int))
@@ -97,6 +117,8 @@ public static class QueryableExtensions
                     return jsonElement.GetInt64();
                 if (type == typeof(double))
                     return jsonElement.GetDouble();
+                if (type == typeof(decimal))
+                    return jsonElement.GetDecimal();
                 break;
             case JsonValueKind.True:
             case JsonValueKind.False:
@@ -116,7 +138,7 @@ public static class QueryableExtensions
 
     private static Expression Create(Expression left, string comparison, Expression right)
     {
-        if (!string.IsNullOrEmpty(comparison) && 
+        if (!string.IsNullOrEmpty(comparison) &&
             comparison.Equals("contains", StringComparison.CurrentCultureIgnoreCase) &&
             left.Type == typeof(string))
         {
