@@ -8,7 +8,7 @@ public static class PagedListExtensions
 {
     public static PagedListResult<T> ToPagedList<T>(this IQueryable<T> query, int pageSize, int pageIndex)
     {
-        int totalItemCount = query is null ? 0 : query.Count(); ;
+        int totalItemCount = query is null ? 0 : query.Count();
         return new PagedListResult<T>
         {
             TotalCount = totalItemCount,
@@ -20,7 +20,7 @@ public static class PagedListExtensions
     }
     public static async Task<PagedListResult<T>> ToPagedListAsync<T>(this IQueryable<T> query, int pageSize, int pageIndex)
     {
-        int totalItemCount = query is null ? 0 : query.Count(); ;
+        int totalItemCount = query is null ? 0 : query.Count();
         return new PagedListResult<T>
         {
             TotalCount = totalItemCount,
@@ -32,7 +32,7 @@ public static class PagedListExtensions
     }
     public static PagedListResult<T> ToPagedList<T>(this IQueryable<T> query, FilterVM filter)
     {
-        int totalItemCount = query is null ? 0 : query.Count(); ;
+       
         if (filter.Conditions.Count != 0)
         {
             foreach (var item in filter.Conditions)
@@ -40,6 +40,7 @@ public static class PagedListExtensions
                 query = query.Filter(item.Name, item.Comparison, item.Value);
             }
         }
+        int totalItemCount = query is null ? 0 : query.Count();
         if (filter.OrderBy is not null)
         {
             query = query.Order(filter.OrderBy.Name, filter.OrderBy.Ascending);
@@ -50,12 +51,12 @@ public static class PagedListExtensions
             PageSize = filter.PageSize,
             PageIndex = filter.PageIndex,
             TotalPages = totalItemCount > 0 ? (int)Math.Ceiling(totalItemCount / (double)filter.PageSize) : 0,
-            Items = query.Skip((filter.PageIndex - 1) * filter.PageSize).Take(filter.PageSize).ToList(),
+            Items = [.. query.Skip((filter.PageIndex - 1) * filter.PageSize).Take(filter.PageSize)],
         };
     }
     public static async Task<PagedListResult<T>> ToPagedListAsync<T>(this IQueryable<T> query, FilterVM filter)
     {
-        int totalItemCount = query is null ? 0 : query.Count(); ;
+
         if (filter.Conditions.Count != 0)
         {
             foreach (var item in filter.Conditions)
@@ -63,6 +64,7 @@ public static class PagedListExtensions
                 query = query.Filter(item.Name, item.Comparison, item.Value);
             }
         }
+        int totalItemCount = query is null ? 0 : query.Count();
         if (filter.OrderBy is not null)
         {
             query = query.Order(filter.OrderBy.Name, filter.OrderBy.Ascending);

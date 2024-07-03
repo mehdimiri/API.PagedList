@@ -15,8 +15,8 @@ namespace Example.WebApplication.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger = logger;
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public dynamic Get([FromBody]FilterVM filter)
+        [HttpPost("GetWeatherForecast")]
+        public dynamic Get(FilterVM filter)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
