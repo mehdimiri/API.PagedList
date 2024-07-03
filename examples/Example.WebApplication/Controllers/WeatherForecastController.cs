@@ -18,14 +18,13 @@ namespace Example.WebApplication.Controllers
         [HttpPost("GetWeatherForecast")]
         public dynamic Get(FilterVM filter)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            IQueryable<WeatherForecast> models = Enumerable.Range(1, 10).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
                 TemperatureC = Random.Shared.Next(-20, 55),
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .AsQueryable()
-            .ToPagedList(filter);
+            }).AsQueryable();
+           return models.ToPagedList(filter);
         }
     }
 }

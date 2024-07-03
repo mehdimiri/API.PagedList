@@ -12,6 +12,15 @@ public class WhereVM
 {
     public string Name { get; set; }
     public object Value { get; set; }
+    /// <summary>
+    /// Contains => "contains"
+    /// LessThan => "<"
+    /// LessThanOrEqual => "<="
+    /// GreaterThan => ">"
+    /// GreaterThanOrEqual => ">="
+    /// Equal => "=="
+    /// NotEqual => "!="
+    /// </summary>
     public string Comparison { get; set; }
 }
 

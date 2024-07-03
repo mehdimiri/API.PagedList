@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace JcoCommon.Extensions;
@@ -61,15 +62,51 @@ public static class QueryableExtensions
 
     private static object Change(object value, Type type)
     {
-        if (type.BaseType != typeof(System.Enum))
+        if (type.IsEnum)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            string stringValue = value.ToString();
+            if (string.IsNullOrEmpty(stringValue))
+                return Activator.CreateInstance(type);
+            return Enum.Parse(type, stringValue, ignoreCase: true);
+        }
+        else if (value is JsonElement jsonElement)
+        {
+            return ConvertJsonElement(jsonElement, type);
+        }
+        else if (value is IConvertible)
+        {
             return Convert.ChangeType(value, type);
+        }
+        else
+        {
+            throw new InvalidCastException($"Cannot convert value of type {value.GetType()} to {type}.");
+        }
+    }
 
-        string stringValue = value.ToString();
-        if (stringValue is null) 
-            return default;
-
-        value = System.Enum.Parse(type, stringValue);
-        return Convert.ChangeType(value, type);
+    private static object ConvertJsonElement(JsonElement jsonElement, Type type)
+    {
+        switch (jsonElement.ValueKind)
+        {
+            case JsonValueKind.String:
+                return jsonElement.GetString();
+            case JsonValueKind.Number:
+                if (type == typeof(int))
+                    return jsonElement.GetInt32();
+                if (type == typeof(long))
+                    return jsonElement.GetInt64();
+                if (type == typeof(double))
+                    return jsonElement.GetDouble();
+                break;
+            case JsonValueKind.True:
+            case JsonValueKind.False:
+                if (type == typeof(bool))
+                    return jsonElement.GetBoolean();
+                break;
+            case JsonValueKind.Null:
+                return null;
+        }
+        throw new InvalidCastException($"Cannot convert JsonElement of kind {jsonElement.ValueKind} to {type}.");
     }
 
     private static Expression Create(string property, Expression parameter)
@@ -79,7 +116,9 @@ public static class QueryableExtensions
 
     private static Expression Create(Expression left, string comparison, Expression right)
     {
-        if (string.IsNullOrWhiteSpace(comparison) && left.Type == typeof(string))
+        if (!string.IsNullOrEmpty(comparison) && 
+            comparison.Equals("contains", StringComparison.CurrentCultureIgnoreCase) &&
+            left.Type == typeof(string))
         {
             return Expression.Call(left, nameof(string.Contains), Type.EmptyTypes, right);
         }
