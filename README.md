@@ -1,6 +1,6 @@
-# PagedList Library for IQueryable with Filtering and Pagination
+# PagedList Library for IQueryable with Filtering, Sorting and Pagination
 
-Welcome to the PagedList library! This library extends `IQueryable` to support efficient pagination and filtering. It's designed to simplify the process of handling large datasets by providing easy-to-use methods for paging and filtering.
+Welcome to the PagedList library! This library extends `IQueryable` to support efficient Filtering, Sorting and Pagination. It's designed to simplify the process of handling large datasets by providing easy-to-use methods for Filtering, Sorting and Paging.
 
 ## Features
 
@@ -17,6 +17,35 @@ pm> Install-Package API.PagedList
 ```
 
 ## Usage
+
+![image](https://drive.google.com/uc?export=view&id=1YbkGPhVsnZlIcVVFcJemyX5p55yori0p)
+
+```csharp
+ [ApiController]
+ [Route("[controller]")]
+ public class WeatherForecastController(ILogger<WeatherForecastController> logger) : ControllerBase
+ {
+     private static readonly string[] Summaries =
+     [
+         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+     ];
+
+     private readonly ILogger<WeatherForecastController> _logger = logger;
+
+     [HttpPost("GetWeatherForecast")]
+     public dynamic Get(FilterVM filter)
+     {
+         IQueryable<WeatherForecast> models = Enumerable.Range(1, 10).Select(index => new WeatherForecast
+         {
+             Date = DateTime.Now.AddDays(index),
+             TemperatureC = Random.Shared.Next(-20, 55),
+             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+         }).AsQueryable();
+        return models.ToPagedList(filter);
+     }
+ }
+```
+![image](https://drive.google.com/uc?export=view&id=1E-2xCbVXs4BmokoLFW3wqumRMOJXu6wX)
 
 ### Pagination
 
@@ -37,11 +66,10 @@ using System.Threading.Tasks;
 var pagedList = await myQueryableSource.ToPagedListAsync(pageSize: 10, pageIndex: 1);
 ```
 
-### Filtering
+### Filtering & Sorting
 
 The library also supports dynamic filtering based on conditions specified in a `FilterVM` object.
 
-![image](https://drive.google.com/uc?export=view&id=1YbkGPhVsnZlIcVVFcJemyX5p55yori0p)
 ```csharp
 using API.PagedList;
 using API.PagedList.Model;
@@ -70,46 +98,7 @@ using System.Threading.Tasks;
 
 var filteredPagedList = await myQueryableSource.ToPagedListAsync(filter);
 ```
-![image](https://drive.google.com/uc?export=view&id=1E-2xCbVXs4BmokoLFW3wqumRMOJXu6wX)
 
-## Example
-
-Here's an example of how you might use the PagedList library in a DbContext and a service class:
-
-```csharp
-using API.PagedList;
-using API.PagedList.Model;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
-
-public class MyDbContext : DbContext
-{
-    public DbSet<MyEntity> MyEntities { get; set; }
-}
-
-public class MyService
-{
-    private readonly MyDbContext _context;
-
-    public MyService(MyDbContext context)
-    {
-        _context = context;
-    }
-
-    // Get a paged list of entities
-    public async Task<PagedListResult<MyEntity>> GetPagedEntities(int pageIndex, int pageSize)
-    {
-        return await _context.MyEntities.ToPagedListAsync(pageSize, pageIndex);
-    }
-
-    // Get a filtered and paged list of entities
-    public async Task<PagedListResult<MyEntity>> GetFilteredPagedEntities(FilterVM filter)
-    {
-        return await _context.MyEntities.ToPagedListAsync(filter);
-    }
-}
-```
 
 ## License
 
