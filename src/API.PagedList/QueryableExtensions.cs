@@ -138,11 +138,14 @@ public static class QueryableExtensions
 
     private static Expression Create(Expression left, string comparison, Expression right)
     {
-        if (!string.IsNullOrEmpty(comparison) &&
-            comparison.Equals("contains", StringComparison.CurrentCultureIgnoreCase) &&
-            left.Type == typeof(string))
+        if (!string.IsNullOrEmpty(comparison) && left.Type == typeof(string))
         {
-            return Expression.Call(left, nameof(string.Contains), Type.EmptyTypes, right);
+            if (comparison.Equals("contains", StringComparison.CurrentCultureIgnoreCase))
+                return Expression.Call(left, nameof(string.Contains), Type.EmptyTypes, right);
+            else if (comparison.Equals("startswith", StringComparison.CurrentCultureIgnoreCase))
+                return Expression.Call(left, nameof(string.StartsWith), Type.EmptyTypes, right);
+            else if (comparison.Equals("endswith", StringComparison.CurrentCultureIgnoreCase))
+                return Expression.Call(left, nameof(string.EndsWith), Type.EmptyTypes, right);
         }
 
         var type = comparison switch
