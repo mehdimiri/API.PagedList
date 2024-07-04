@@ -41,6 +41,7 @@ var pagedList = await myQueryableSource.ToPagedListAsync(pageSize: 10, pageIndex
 
 The library also supports dynamic filtering based on conditions specified in a `FilterVM` object.
 
+![image](https://drive.google.com/uc?export=view&id=1YbkGPhVsnZlIcVVFcJemyX5p55yori0p)
 ```csharp
 using API.PagedList;
 using API.PagedList.Model;
@@ -69,6 +70,7 @@ using System.Threading.Tasks;
 
 var filteredPagedList = await myQueryableSource.ToPagedListAsync(filter);
 ```
+![image](https://drive.google.com/uc?export=view&id=1E-2xCbVXs4BmokoLFW3wqumRMOJXu6wX)
 
 ## Example
 
@@ -108,9 +110,6 @@ public class MyService
     }
 }
 ```
-
-![image](https://drive.google.com/file/d/1YbkGPhVsnZlIcVVFcJemyX5p55yori0p/view?usp=sharing)
-
 
 ## License
 
